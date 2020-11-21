@@ -1,4 +1,4 @@
-# bitso
+# Bitso API golang client ![Go](https://github.com/fernandez14/bitso/workflows/Go/badge.svg) [![GoDoc](https://godoc.org/github.com/fernandez14/bitso?status.svg)](https://pkg.go.dev/github.com/fernandez14/bitso)  
 
 <img align="right" width="100" src="https://assets.bitso.com/static/media/logo_dark.93562fe3.svg">
 
