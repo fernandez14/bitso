@@ -30,3 +30,6 @@ jobs:
 
     - name: Test
       run: go test -v .
+      env:
+        BITSO_KEY: ${{ secrets.BITSO_KEY }}
+        BITSO_SECRET: ${{ secrets.BITSO_SECRET }}
