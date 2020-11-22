@@ -4,11 +4,23 @@ import (
 	"bytes"
 	"context"
 	"net/http"
+	"os"
 	"testing"
 )
 
+var (
+	apiKey string
+	secret string
+)
+
 func testClient() *Service {
-	return New(http.DefaultClient, "test")
+	if v, exists := os.LookupEnv("BITSO_KEY"); exists {
+		apiKey = v
+	}
+	if v, exists := os.LookupEnv("BITSO_SECRET"); exists {
+		secret = v
+	}
+	return New(http.DefaultClient, apiKey, secret)
 }
 
 func TestNew(t *testing.T) {
@@ -16,7 +28,7 @@ func TestNew(t *testing.T) {
 	if n.sling == nil {
 		t.Error("sling http client pointer is nil")
 	}
-	if bytes.Compare(n.secret, []byte("test")) != 0 {
+	if bytes.Compare(n.secret, []byte(secret)) != 0 {
 		t.Error("secret bytes are unexpectedly unequal")
 	}
 }
@@ -52,4 +64,19 @@ func TestService_OrderBook(t *testing.T) {
 		t.Errorf("tick invalid book sequence received 	value=%v", book.OrderBook.Sequence)
 	}
 	t.Logf("order_book read	book=%+v", book.OrderBook)
+}
+
+func TestService_Balance(t *testing.T) {
+	c := testClient()
+	balance, err := c.Balance(context.Background())
+	if err != nil {
+		t.Errorf("balance failed	err=%v", err)
+	}
+	if balance.Success == false {
+		t.Error("balance did not succeed")
+	}
+	if len(balance.Balances.List) == 0 {
+		t.Errorf("balance response empty received 	value=%v", balance.Balances)
+	}
+	t.Logf("balances read	balance=%+v", balance.Balances)
 }
