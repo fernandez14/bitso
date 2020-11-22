@@ -76,7 +76,7 @@ func TestService_Balance(t *testing.T) {
 		t.Error("balance did not succeed")
 	}
 	if len(balance.Balances.List) == 0 {
-		t.Errorf("balance response empty received 	value=%v", balance.Balances)
+		t.Error("balance response empty received")
 	}
 	t.Logf("balances read	balance=%+v", balance.Balances)
 }
