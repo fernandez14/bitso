@@ -10,10 +10,11 @@ import (
 	"time"
 )
 
-func bitsoAuth(s *sling.Sling, secret []byte) *sling.Sling {
+func bitsoAuth(s *sling.Sling, apiKey string, secret []byte) *sling.Sling {
 	t := time.Now().UnixNano()
 	h := hmac.New(sha256.New, secret)
-	h.Write([]byte(strconv.Itoa(int(t))))
+	nonce := strconv.Itoa(int(t))
+	h.Write([]byte(nonce))
 	r, err := s.Request()
 	if err != nil {
 		return s
@@ -27,5 +28,5 @@ func bitsoAuth(s *sling.Sling, secret []byte) *sling.Sling {
 		}
 	}
 	sha := hex.EncodeToString(h.Sum(nil))
-	return s.Set("authorization", "Bitso "+sha)
+	return s.Set("authorization", "Bitso "+apiKey+":"+nonce+":"+sha)
 }

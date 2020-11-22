@@ -14,13 +14,15 @@ var (
 // Service is the API gateway struct.
 type Service struct {
 	secret []byte
+	apiKey string
 	sling  *sling.Sling
 }
 
 // New setups a service struct to interact with bitso.com API.
-func New(httpClient *http.Client, secret string) *Service {
+func New(httpClient *http.Client, apiKey, secret string) *Service {
 	return &Service{
 		secret: []byte(secret),
+		apiKey: apiKey,
 		sling:  sling.New().Client(httpClient).Base(BaseURL),
 	}
 }
@@ -54,7 +56,7 @@ func (srv *Service) Ticker(ctx context.Context, book string) (r tickResponse, er
 		req  *http.Request
 	)
 	get := srv.sling.New().Get("v3/ticker").QueryStruct(TickerParams{Book: book})
-	withAuth := bitsoAuth(get, srv.secret)
+	withAuth := bitsoAuth(get, srv.apiKey, srv.secret)
 	req, err = withAuth.Request()
 	if err != nil {
 		return
@@ -93,14 +95,14 @@ type OrderBook struct {
 	Sequence string      `json:"sequence"`
 }
 
-// Ticker performs a request to a book with bitso:v3/ticker
+// OrderBook performs a request to a book with bitso:v3/order_book
 func (srv *Service) OrderBook(ctx context.Context, params OrderBookParams) (r orderBookResponse, err error) {
 	var (
 		resp *http.Response
 		req  *http.Request
 	)
 	get := srv.sling.New().Get("v3/order_book").QueryStruct(params)
-	withAuth := bitsoAuth(get, srv.secret)
+	withAuth := bitsoAuth(get, srv.apiKey, srv.secret)
 	req, err = withAuth.Request()
 	if err != nil {
 		return
@@ -110,6 +112,47 @@ func (srv *Service) OrderBook(ctx context.Context, params OrderBookParams) (r or
 	if err != nil {
 		return
 	}
+	r.Http = resp
+	return
+}
+
+type Balance struct {
+	Currency  string  `json:"currency"`
+	Total     float64 `json:"total,string"`
+	Locked    float64 `json:"locked,string"`
+	Available float64 `json:"available,string"`
+}
+
+type BalanceRes struct {
+	List []Balance `json:"balances"`
+}
+
+type balanceResponse struct {
+	Success  bool
+	Http     *http.Response
+	Balances BalanceRes `json:"payload"`
+}
+
+func (srv *Service) doReq(ctx context.Context, slingReq *sling.Sling, success interface{}) (resp *http.Response, err error) {
+	var (
+		req *http.Request
+	)
+	withAuth := bitsoAuth(slingReq, srv.apiKey, srv.secret)
+	req, err = withAuth.Request()
+	if err != nil {
+		return
+	}
+	req = req.WithContext(ctx)
+	resp, err = withAuth.Do(req, &success, nil)
+	return
+}
+
+// Balance performs a request to a book with bitso:v3/balance
+func (srv *Service) Balance(ctx context.Context) (r balanceResponse, err error) {
+	var (
+		resp *http.Response
+	)
+	resp, err = srv.doReq(ctx, srv.sling.New().Get("v3/balance"), &r)
 	r.Http = resp
 	return
 }
