@@ -48,6 +48,21 @@ func TestService_Ticker(t *testing.T) {
 	t.Logf("tick read	tick=%+v", ticker.Tick)
 }
 
+func TestService_AvailableBooks(t *testing.T) {
+	c := testClient()
+	books, err := c.AvailableBooks(context.Background())
+	if err != nil {
+		t.Errorf("order book failed	err=%v", err)
+	}
+	if books.Success == false {
+		t.Error("tick did not succeed")
+	}
+	if len(books.List) == 0 {
+		t.Errorf("empty available_books 	value=%v", books)
+	}
+	t.Logf("available_books read	boosk=%+v", books.List)
+}
+
 func TestService_OrderBook(t *testing.T) {
 	c := testClient()
 	book, err := c.OrderBook(context.Background(), OrderBookParams{
