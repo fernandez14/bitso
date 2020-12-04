@@ -85,15 +85,15 @@ type OrderBookParams struct {
 	Aggregate bool   `url:"aggregate,omitempty"`
 }
 
-type OpenOrder struct {
+type BookOrder struct {
 	Book   string `json:"book"`
 	Price  string `json:"price"`
 	Amount string `json:"amount"`
 }
 
 type OrderBook struct {
-	Asks     []OpenOrder `json:"asks"`
-	Bids     []OpenOrder `json:"bids"`
+	Asks     []BookOrder `json:"asks"`
+	Bids     []BookOrder `json:"bids"`
 	Updated  time.Time   `json:"updated_at"`
 	Sequence string      `json:"sequence"`
 }
@@ -237,5 +237,41 @@ func (srv *Service) Ask(ctx context.Context, amount, price, book string) (r plac
 		Major: amount,
 		Price: price,
 	})
+	return
+}
+
+type OpenOrder struct {
+	OID            string `json:"oid"`
+	Book           string `json:"book"`
+	OriginalAmount string `json:"original_amount"`
+	UnfilledAmount string `json:"unfilled_amount"`
+	OriginalValue  string `json:"original_value"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
+	Price          string `json:"price"`
+	Side           string `json:"side"`
+	Status         string `json:"status"`
+	Type           string `json:"type"`
+}
+
+type openOrdersResponse struct {
+	Success bool
+	Http    *http.Response
+	List    []OpenOrder `json:"payload"`
+}
+
+type OpenOrderParams struct {
+	Book   string `url:"book,omitempty"`
+	Marker string `url:"marker,omitempty"`
+	Sort   string `url:"sort,omitempty"`
+	Limit  int    `url:"limit,omitempty"`
+}
+
+func (srv *Service) OpenOrders(ctx context.Context, params OpenOrderParams) (r openOrdersResponse, err error) {
+	var (
+		resp *http.Response
+	)
+	resp, err = srv.doReq(ctx, srv.sling.New().Get("v3/open_orders").QueryStruct(&params), &r)
+	r.Http = resp
 	return
 }
