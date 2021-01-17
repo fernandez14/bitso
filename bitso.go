@@ -136,7 +136,7 @@ func (srv *Service) Balance(ctx context.Context) (r balanceResponse, err error) 
 }
 
 type AvailableBook struct {
-	Book          string `json:"currency"`
+	Book          string `json:"book"`
 	MinimumAmount string `json:"minimum_amount"`
 	MaximumAmount string `json:"maximum_amount"`
 	MinimumPrice  string `json:"minimum_price"`
