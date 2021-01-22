@@ -203,7 +203,7 @@ func (srv *Service) CancelOrder(ctx context.Context, params CancelOrderParams) (
 	if params.All {
 		req = req.Delete("v3/orders/all")
 	} else {
-		req = req.QueryStruct(params)
+		req = req.Delete("v3/orders").QueryStruct(params)
 	}
 	resp, err = srv.doReq(ctx, req, &r)
 	r.Http = resp
