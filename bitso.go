@@ -210,10 +210,14 @@ func (srv *Service) CancelOrder(ctx context.Context, params CancelOrderParams) (
 	return
 }
 
+type PlacedOrder struct {
+	OID string `json:"oid"`
+}
+
 type placeOrderResponse struct {
 	Success bool
 	Http    *http.Response
-	List    []string `json:"payload"`
+	Placed  PlacedOrder `json:"payload"`
 }
 
 type PlaceOrderParams struct {
