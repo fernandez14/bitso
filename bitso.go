@@ -220,7 +220,7 @@ type PlaceOrderParams struct {
 	Book        string `json:"book"`
 	Side        string `json:"side"`
 	Type        string `json:"type"`
-	Major       string `json:"type,omitempty"`
+	Major       string `json:"major,omitempty"`
 	Minor       string `json:"minor,omitempty"`
 	Price       string `json:"price,omitempty"`
 	Stop        string `json:"stop,omitempty"`
