@@ -95,3 +95,15 @@ func TestService_Balance(t *testing.T) {
 	}
 	t.Logf("balances read	balance=%+v", balance.Balances)
 }
+
+func TestService_OpenOrders(t *testing.T) {
+	c := testClient()
+	open, err := c.OpenOrders(context.Background(), OpenOrderParams{Limit: 100})
+	if err != nil {
+		t.Errorf("open_orders failed	err=%v", err)
+	}
+	if open.Success == false {
+		t.Error("open_orders did not succeed")
+	}
+	t.Logf("open_orders read	len=%+v", len(open.List))
+}

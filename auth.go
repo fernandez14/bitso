@@ -21,6 +21,10 @@ func bitsoAuth(s *sling.Sling, apiKey string, secret []byte) *sling.Sling {
 	}
 	h.Write([]byte(r.Method))
 	h.Write([]byte(r.URL.Path))
+	if len(r.URL.RawQuery) > 0 {
+		h.Write([]byte("?"))
+		h.Write([]byte(r.URL.RawQuery))
+	}
 	if r.Method == "POST" {
 		b, err := ioutil.ReadAll(r.Body)
 		if err == nil {
