@@ -2,6 +2,7 @@ package bitso
 
 import (
 	"context"
+	"fmt"
 	"github.com/dghubble/sling"
 	"net/http"
 	"time"
@@ -18,6 +19,19 @@ type Service struct {
 	sling  *sling.Sling
 }
 
+type BitsoError struct {
+	Message string `json:"message"`
+	Code    string `json:"code"`
+}
+
+type BitsoErrRes struct {
+	Wrap *BitsoError `json:"error"`
+}
+
+func (e BitsoErrRes) Error() string {
+	return fmt.Sprintf("bitso: code %v message %v", e.Wrap.Code, e.Wrap.Message)
+}
+
 func (srv *Service) doReq(ctx context.Context, slingReq *sling.Sling, success interface{}) (resp *http.Response, err error) {
 	var (
 		req *http.Request
@@ -28,7 +42,14 @@ func (srv *Service) doReq(ctx context.Context, slingReq *sling.Sling, success in
 		return
 	}
 	req = req.WithContext(ctx)
-	resp, err = withAuth.Do(req, &success, nil)
+	bitsoErr := new(BitsoErrRes)
+	resp, err = withAuth.Do(req, &success, bitsoErr)
+	if err != nil {
+		return
+	}
+	if bitsoErr.Wrap != nil {
+		err = bitsoErr
+	}
 	return
 }
 
